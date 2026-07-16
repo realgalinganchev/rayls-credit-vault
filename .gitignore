@@ -1,0 +1,19 @@
+# Compiler output
+out/
+cache/
+broadcast/
+
+# Coverage artifacts
+lcov.info
+
+# Environment
+.env
+
+# Dependencies
+# NOTE: package-lock.json is deliberately COMMITTED — @rayls/contracts is
+# pinned to a nightly and OZ resolves via node_modules remappings, so
+# reproducible (auditable) builds depend on the lockfile.
+node_modules/
+
+# OS
+.DS_Store

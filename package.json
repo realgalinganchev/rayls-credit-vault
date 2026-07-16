@@ -1,0 +1,8 @@
+{
+  "private": true,
+  "dependencies": {
+    "@rayls/contracts": "2.6.3-nightly.2",
+    "@openzeppelin/contracts": "5.4.0",
+    "@openzeppelin/contracts-upgradeable": "5.4.0"
+  }
+}
