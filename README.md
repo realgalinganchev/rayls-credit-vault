@@ -20,7 +20,7 @@ Flow: depositors → vault (ERC-4626 shares) → curator allocates → lending m
 ```sh
 npm install          # REQUIRED before forge build — OZ + Rayls SDK resolve via node_modules remappings
 forge build
-forge test           # 63 tests / 4 suites
+forge test           # 64 tests / 4 suites
 
 # Narrated end-to-end demo (deploy → deposit → allocate → borrow → NAV writedown → liquidation → issuer redemption):
 anvil                # terminal 1
@@ -41,17 +41,17 @@ The demo uses Anvil's public default keys. **Never fund those addresses on a rea
 
 - **Oracle:** owner-set NAV on the mock token, not an attested/Chainlink feed. The market enforces `nav > 0` (zero/reverting oracle reverts pricing operations loudly) and requires 18-decimal collateral at construction, but NAV freshness/manipulation is out of scope.
 - **Single market, no factory** — one loan asset, one collateral, one oracle, vs. Morpho's permissionless multi-market design.
-- **Owner-curator centralization:** market owner sets fee (≤ 25% cap) and fee recipient; vault owner controls allocation. No timelock/multisig.
+- **Owner-curator centralization:** market owner sets fee (≤ 25% cap) and fee recipient; vault owner controls allocation. No timelock/multisig, though ownership transfers on the market and mock issuer are two-step (`Ownable2Step`).
 - **Interest is simple (non-compounding)** within each accrual window, at the rate prevailing when accrual materializes — diverges from Morpho's Taylor-compounded accrual.
 - **Liquidator exit is issuer-redemption**, not market sale (matches AmFi's real exit mechanics today).
 - **Vault allocation cap** is enforced at allocate-time only; the deployed ratio drifts passively as interest accrues.
 
 ## Testing & coverage
 
-63 tests across 4 suites, including regression tests for every finding of the pre-audit review (bad-debt socialization, fee-dilution-exact `supplyBalance` projection, sub-unit interest non-forfeiture, EIP-4626 `max*` under illiquidity, zero-NAV oracle guard, donation-attack resistance at both market and vault level).
+64 tests across 4 suites, including regression tests for every finding of both security passes (bad-debt socialization incl. the dust-value bypass, fee-dilution-exact `supplyBalance` projection, sub-unit interest non-forfeiture, EIP-4626 `max*` under illiquidity, zero-NAV oracle guard, donation-attack resistance at both market and vault level).
 
 Coverage (canonical command: `forge coverage --no-match-coverage "(script/|HackathonToken|test/)"`):
-`CuratedCreditVault` 100% lines/branches · `LendingMarket` 97% lines / 81% branches · mocks 100% lines.
+`CuratedCreditVault` 100% lines / 93% branches · `LendingMarket` 98% lines / 81% branches · mocks 100% lines.
 
 ## Rayls bridge reference (kept from the official starter)
 
