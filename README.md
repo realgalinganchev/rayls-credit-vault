@@ -20,7 +20,7 @@ Flow: depositors → vault (ERC-4626 shares) → curator allocates → lending m
 ```sh
 npm install          # REQUIRED before forge build — OZ + Rayls SDK resolve via node_modules remappings
 forge build
-forge test           # 64 tests / 4 suites
+forge test           # 69 tests / 4 suites
 
 # Narrated end-to-end demo (deploy → deposit → allocate → borrow → NAV writedown → liquidation → issuer redemption):
 anvil                # terminal 1
@@ -48,10 +48,10 @@ The demo uses Anvil's public default keys. **Never fund those addresses on a rea
 
 ## Testing & coverage
 
-64 tests across 4 suites, including regression tests for every finding of both security passes (bad-debt socialization incl. the dust-value bypass, fee-dilution-exact `supplyBalance` projection, sub-unit interest non-forfeiture, EIP-4626 `max*` under illiquidity, zero-NAV oracle guard, donation-attack resistance at both market and vault level).
+69 tests across 4 suites, including regression tests for every finding of both security passes (bad-debt socialization incl. the dust-value bypass and the rounding-overshoot clamp, fee-dilution-exact `supplyBalance` projection, sub-unit interest non-forfeiture, EIP-4626 `max*` under illiquidity, zero-NAV oracle guard, donation-attack resistance at both market and vault level) plus a branch-coverage completion sweep.
 
 Coverage (canonical command: `forge coverage --no-match-coverage "(script/|HackathonToken|test/)"`):
-`CuratedCreditVault` 100% lines / 93% branches · `LendingMarket` 98% lines / 81% branches · mocks 100% lines.
+**100% branch and statement coverage on all four contracts** (lines 99.4–100%).
 
 ## Rayls bridge reference (kept from the official starter)
 

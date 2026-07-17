@@ -63,6 +63,11 @@ contract MockAmFiCreditTest is Test {
         amfi.setNav(500_000);
     }
 
+    function test_FundRedemptionPool_RevertsOnZeroAmount() public {
+        vm.expectRevert("zero amount");
+        amfi.fundRedemptionPool(0);
+    }
+
     function test_FundRedemptionPool_TransfersInAndEmits() public {
         usdr.approve(address(amfi), 50_000 * 1e6);
         vm.expectEmit(true, true, true, true);

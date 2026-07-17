@@ -248,6 +248,11 @@ contract CuratedCreditVaultTest is Test {
         vault.allocate(0);
     }
 
+    function test_Deallocate_RevertsOnZeroAmount() public {
+        vm.expectRevert("zero amount");
+        vault.deallocate(0);
+    }
+
     // -----------------------------------------------------------------
     // Helpers
     // -----------------------------------------------------------------

@@ -574,6 +574,88 @@ contract LendingMarketTest is Test {
     }
 
     // -----------------------------------------------------------------
+    // Branch-coverage completion (post-review sweep)
+    // -----------------------------------------------------------------
+
+    /// @dev Covers the zero-value revert guard on every user entrypoint that
+    ///      still lacked a negative test. All guards are the first statement
+    ///      of their function, so no position setup is needed.
+    function test_ZeroValueReverts_AllEntrypoints() public {
+        vm.expectRevert("zero shares");
+        market.withdraw(0);
+
+        vm.expectRevert("zero assets");
+        market.withdrawAssets(0);
+
+        vm.expectRevert("zero amount");
+        market.supplyCollateral(0);
+
+        vm.expectRevert("zero amount");
+        market.withdrawCollateral(0);
+
+        vm.expectRevert("zero assets");
+        market.borrow(0);
+
+        vm.expectRevert("zero shares");
+        market.repay(0);
+
+        vm.expectRevert("zero shares");
+        market.liquidate(borrower, 0);
+    }
+
+    /// @dev Covers the idle-market clock-advance branch of _accrueInterest:
+    ///      with zero borrows nothing can accrue, but the accrual timestamp
+    ///      must still move forward so a future first borrow doesn't accrue
+    ///      retroactively over the idle window.
+    function test_InterestAccrual_AdvancesClockWhenIdle() public {
+        _supply(lender, 100_000 * 1e6); // no borrows exist
+        uint256 t0 = market.lastAccrualTimestamp();
+
+        vm.warp(block.timestamp + 30 days);
+        _supply(lender, 1 * 1e6); // triggers _accrueInterest on an idle market
+
+        assertGt(market.lastAccrualTimestamp(), t0, "clock must advance while idle");
+        assertEq(market.totalSupplyAssets(), 100_001 * 1e6, "no interest may materialize");
+    }
+
+    /// @dev Covers the bad-debt clamp (`badDebtAssets > totalBorrowAssets`).
+    ///      Reachable via share-ratio drift: repay() removes assets rounded UP
+    ///      per share burned, so a 1-share repay on a tiny position removes a
+    ///      full asset unit and pushes shares-per-asset above the initial 1e6.
+    ///      From there, _toAssetsUp over the remaining shares can exceed the
+    ///      remaining assets by 1, and without the clamp the socialization
+    ///      write-off would underflow totalBorrowAssets.
+    function test_Liquidate_BadDebtClampOnRoundingOvershoot() public {
+        _supply(lender, 1_000 * 1e6);
+        _supplyCollateral(borrower, 1e18); // value 1.00 USDr at NAV 1e6 -> maxBorrow 0.70 USDr
+        _borrow(borrower, 3); // 3 base units -> 3e6 borrow shares (1e6 shares/unit)
+
+        // Drift the ratio: burning 1 share removes ceil(1 * 4 / 4e6) = 1 full
+        // asset unit -> A: 3 -> 2, S: 3e6 -> 3e6-1 (now > A * 1e6).
+        vm.startPrank(borrower);
+        usdr.approve(address(market), type(uint256).max);
+        market.repay(1);
+        vm.stopPrank();
+
+        amfi.setNav(1); // crash NAV to the minimum -> position deeply unhealthy
+
+        // Liquidate 1 share: seizes the entire 1e18 collateral (capped), the
+        // remaining collateral value is 0, and the rump shares' ceil-valuation
+        // (2) exceeds the remaining assets (1) -> clamp branch fires.
+        vm.startPrank(liquidator);
+        usdr.approve(address(market), type(uint256).max);
+        market.liquidate(borrower, 1);
+        vm.stopPrank();
+
+        // Clean zero-state proves the clamp prevented underflow and the rump
+        // was fully written off.
+        assertEq(market.totalBorrowAssets(), 0);
+        assertEq(market.totalBorrowShares(), 0);
+        assertEq(market.borrowShares(borrower), 0);
+        assertEq(market.debtOf(borrower), 0);
+    }
+
+    // -----------------------------------------------------------------
     // Helpers
     // -----------------------------------------------------------------
 

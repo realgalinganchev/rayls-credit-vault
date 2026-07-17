@@ -85,6 +85,14 @@ contract CuratedCreditVault is ERC4626, Ownable, ReentrancyGuard {
     ///         mirror allocate() (avoids the assets-vs-shares footgun). To fully
     ///         exit, pass `market.supplyBalance(address(this))`. Deliberately
     ///         has no cap check — reducing deployment is always allowed.
+    /// @dev KNOWN, ACCEPTED DUST: a "full" exit may leave a few wei of market
+    ///      shares behind — withdrawAssets rounds shares up, and
+    ///      toSharesUp(toAssetsDown(s)) <= s, so the burn never exceeds what
+    ///      the vault holds but can fall slightly short of all of it. The
+    ///      residue stays counted in totalAssets(), so no value is lost. Do
+    ///      NOT "fix" this by reverting to a share-denominated signature:
+    ///      that reintroduces the assets-vs-shares confusion this API was
+    ///      changed to remove (audit finding L-02).
     function deallocate(uint256 amount) external onlyOwner {
         require(amount > 0, "zero amount");
         market.withdrawAssets(amount);
