@@ -267,6 +267,14 @@ contract LendingMarket is Ownable2Step, ReentrancyGuard {
         _accrueInterest();
 
         assets = _toAssetsUp(shares, totalBorrowAssets, totalBorrowShares);
+        // Clamp the ceil-rounded amount to the booked total. In a drifted
+        // tiny-position state a sole borrower's full-repay `assets` can
+        // overshoot totalBorrowAssets by the rounding and otherwise underflow,
+        // stranding them with undischargeable dust debt. Capping at the true
+        // debt total lets the position fully close, and the borrower never pays
+        // more than is booked — no value leaks. (Mirrors the bad-debt
+        // socialization clamp; see docs/decisions/0002.)
+        if (assets > totalBorrowAssets) assets = totalBorrowAssets;
         borrowShares[msg.sender] -= shares; // reverts on underflow if insufficient
         totalBorrowShares -= shares;
         totalBorrowAssets -= assets;

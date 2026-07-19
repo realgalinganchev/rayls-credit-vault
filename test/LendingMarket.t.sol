@@ -655,6 +655,30 @@ contract LendingMarketTest is Test {
         assertEq(market.debtOf(borrower), 0);
     }
 
+    /// @dev Regression for the repay ceil-overshoot corner (ADR 0002): after
+    ///      engineered share-ratio drift, a sole borrower's single-shot full
+    ///      repay must now close the position. Pre-fix the ceil-rounded assets
+    ///      overshot totalBorrowAssets and reverted on the underflow, and even
+    ///      chunked repay stranded ~1 unit of undischargeable dust debt.
+    function test_Repay_ClampsCeilOvershoot_FullExit() public {
+        _supply(lender, 1_000 * 1e6);
+        _supplyCollateral(borrower, 1e18); // $1.00 at NAV 1e6 -> maxBorrow $0.70
+        _borrow(borrower, 3); // 3 base units -> 3e6 borrow shares
+        usdr.transfer(borrower, 100 * 1e6); // fund the repays
+
+        vm.startPrank(borrower);
+        usdr.approve(address(market), type(uint256).max);
+        market.repay(1); // drift: shares-per-asset now above the initial 1e6
+        // Full repay of the remaining shares must succeed (was: underflow).
+        market.repay(market.borrowShares(borrower));
+        vm.stopPrank();
+
+        assertEq(market.borrowShares(borrower), 0, "position fully closed");
+        assertEq(market.debtOf(borrower), 0, "no dust debt stranded");
+        assertEq(market.totalBorrowAssets(), 0);
+        assertEq(market.totalBorrowShares(), 0);
+    }
+
     // -----------------------------------------------------------------
     // Helpers
     // -----------------------------------------------------------------
