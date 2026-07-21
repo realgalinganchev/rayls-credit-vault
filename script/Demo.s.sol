@@ -191,6 +191,17 @@ contract Demo is Script {
         console.log("  (2%% base + up to 10%% slope by utilization; borrowers pay this, lenders");
         console.log("   earn it minus the 15%% curator fee. Full multi-day accrual math is proven");
         console.log("   in the unit tests via vm.warp, where it's safe to fast-forward.)");
+
+        // Projected annual interest at the current rate/utilization -- a pure
+        // calculation (no time-warp, no state change), so it reads identically
+        // in local simulation, an Anvil broadcast, and on a real testnet. Makes
+        // the yield economics visible without pretending time has passed.
+        uint256 grossPerYear = (market.totalBorrowAssets() * market.borrowRateWadPerYear()) / 1e18;
+        uint256 toLenders = (grossPerYear * (10_000 - CURATOR_FEE_BPS)) / 10_000;
+        console.log("  Projected annual interest at this utilization:");
+        console.log("    gross, paid by borrowers (mUSDr/yr):    ", grossPerYear);
+        console.log("    to lenders, net of the 15%% fee (mUSDr/yr):", toLenders);
+        console.log("    to curator, the 15%% fee (mUSDr/yr):      ", grossPerYear - toLenders);
         console.log("");
     }
 
