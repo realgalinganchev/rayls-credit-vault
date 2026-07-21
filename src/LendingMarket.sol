@@ -77,11 +77,22 @@ contract LendingMarket is Ownable2Step, ReentrancyGuard {
 
     // ---------------------------------------------------------------------
     // Immutable market configuration
+    //
+    // These are intentionally lowerCamelCase: each `public immutable` exposes
+    // an auto-generated getter (loanToken(), oracle(), ...) that the vault,
+    // scripts, and tests already call by name. Renaming to SCREAMING_SNAKE
+    // would rename those getters and break the ABI, so we opt this specific
+    // block out of forge-lint's naming rule (the tool's exclude_lints config
+    // ignores this lint in v1.3.0, so the opt-out lives inline).
     // ---------------------------------------------------------------------
 
+    // forge-lint: disable-next-line(screaming-snake-case-immutable)
     IERC20 public immutable loanToken; // USDr
+    // forge-lint: disable-next-line(screaming-snake-case-immutable)
     IERC20 public immutable collateralToken; // AmFi tokenized credit
+    // forge-lint: disable-next-line(screaming-snake-case-immutable)
     INavOracle public immutable oracle; // NAV feed for collateralToken
+    // forge-lint: disable-next-line(screaming-snake-case-immutable)
     uint256 public immutable liquidationLtvBps; // e.g. 7000 = 70%
 
     // Divisor pairing with INavOracle's unit convention (see interface
@@ -93,7 +104,9 @@ contract LendingMarket is Ownable2Step, ReentrancyGuard {
     // Interest rate model (linear, utilization-based)
     // ---------------------------------------------------------------------
 
+    // forge-lint: disable-next-line(screaming-snake-case-immutable)
     uint256 public immutable baseRateWadPerYear; // rate at 0% utilization
+    // forge-lint: disable-next-line(screaming-snake-case-immutable)
     uint256 public immutable slopeWadPerYear; // additional rate at 100% utilization
 
     // ---------------------------------------------------------------------

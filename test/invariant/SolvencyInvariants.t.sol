@@ -27,7 +27,6 @@ pragma solidity 0.8.24;
 // -----------------------------------------------------------------------------
 
 import {Test} from "forge-std/Test.sol";
-import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {MockUSDr} from "../../src/MockUSDr.sol";
 import {MockAmFiCredit} from "../../src/MockAmFiCredit.sol";
 import {LendingMarket} from "../../src/LendingMarket.sol";

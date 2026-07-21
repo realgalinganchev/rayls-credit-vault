@@ -47,6 +47,7 @@ contract MockAmFiCredit is ERC20, Ownable2Step, ReentrancyGuard {
     /// @notice Asset paid out on redemption (mUSDr). Set once at deploy —
     ///         in production this would be whatever stable/cash asset the
     ///         issuer actually settles redemptions in.
+    // forge-lint: disable-next-line(screaming-snake-case-immutable)
     IERC20 public immutable redemptionAsset;
 
     event NavUpdated(uint256 oldNav, uint256 newNav);

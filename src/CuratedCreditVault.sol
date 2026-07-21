@@ -25,6 +25,9 @@ import {LendingMarket} from "./LendingMarket.sol";
 contract CuratedCreditVault is ERC4626, Ownable, ReentrancyGuard {
     using SafeERC20 for IERC20;
 
+    // Intentionally lowerCamelCase — public getter market() is part of the ABI;
+    // see LendingMarket for the full rationale.
+    // forge-lint: disable-next-line(screaming-snake-case-immutable)
     LendingMarket public immutable market;
 
     /// @notice Max fraction (in bps) of totalAssets the curator will deploy
