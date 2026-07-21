@@ -38,6 +38,18 @@ phantom debt.
   wei of (zero-value) dust, which re-introduces the phantom debt.
 - **Insurance / backstop fund** — meaningful, but out of scope for a
   single-market PoC.
+- **Appointed/designated liquidator** — rejected on two independent grounds:
+  (1) a single point of failure — if that party is offline, censored, or
+  compromised, *no* liquidation happens at all, not even the easy, obviously
+  profitable ones, which is worse than the rare case this would fix; (2) it
+  doesn't even solve the incentive problem — an appointed party still faces
+  the same pure-donation math on a worthless position, so it would need a
+  subsidy to act anyway. The permissionless design already lets anyone,
+  including the curator, voluntarily act as a backstop with their own
+  capital today, no code change required. A protocol-funded bad-debt
+  bounty (reimbursing gas plus a small fee for closing out confirmed-worthless
+  positions) would be the cleaner fix if ever built — same spirit as the
+  insurance-fund idea above, just permissionless and narrower in scope.
 
 ## Rounding-overshoot handling in `repay`
 

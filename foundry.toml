@@ -7,8 +7,5 @@ optimizer = true
 optimizer_runs = 200 # bumped from the Rayls starter's PoC value of 50
 evm_version = "paris"
 
-[rpc_endpoints]
-privacy_ledger = "${PRIVACY_NODE_RPC_URL}"
-
 [lint]
 exclude_lints = ["screaming-snake-case-immutable", "mixed-case-variable", "erc20-unchecked-transfer"]

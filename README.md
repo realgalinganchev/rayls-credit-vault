@@ -2,7 +2,10 @@
 
 Curated RWA-collateral lending vault for the Rayls Public Chain — USDr depositors earn yield lent against AmFi tokenized-credit collateral. Morpho-Blue-inspired lending market + ERC-4626 curated vault. **Proof of concept, not production.**
 
-The full research report behind this build — market landscape, venue selection, product design, risk analysis, and roadmap — is in [RESEARCH.pdf](RESEARCH.pdf).
+This code is the implementation half of a research project — *survey the institutional-blockchain landscape, pick a genuine dApp use case, build it* (~80% research / 20% implementation). Two reports accompany it:
+
+- **[LANDSCAPE-REPORT.pdf](LANDSCAPE-REPORT.pdf)** — the research (~80%): the institutional-blockchain landscape survey, per-platform L1/L2 deep-dives (Chainlink, Canton, Polkadot, and the rest), money patterns, and venue selection.
+- **[BUILD-REPORT.pdf](BUILD-REPORT.pdf)** — the implementation (~20%): the chosen use case, the Rayls venue, product design, risk analysis, and roadmap behind this repo.
 
 ## Architecture
 
@@ -50,13 +53,13 @@ The demo uses Anvil's public default keys. **Never fund those addresses on a rea
 
 77 tests across 5 suites, including regression tests for every finding of both security passes (bad-debt socialization incl. the dust-value bypass and the rounding-overshoot clamp, fee-dilution-exact `supplyBalance` projection, sub-unit interest non-forfeiture, EIP-4626 `max*` under illiquidity, zero-NAV oracle guard, donation-attack resistance at both market and vault level), a branch-coverage completion sweep, and a stateful **invariant (fitness-function) suite** (`test/invariant/`) that drives the vault and market *together* — with fee changes and NAV crashes in the mix — and holds the solvency and value-conservation properties (`S ≥ D`, cash ≥ advertised liquidity, collateral fully backed, share-sum consistency, and no rounding-minted value on either layer) across 128k randomized operation sequences.
 
-Coverage (canonical command: `forge coverage --no-match-coverage "(script/|HackathonToken|test/)"`):
+Coverage (canonical command: `forge coverage --no-match-coverage "(script/|test/)"`):
 **100% branch and statement coverage on all four contracts** (lines 99.4–100%).
 
 ## Design & decisions
 
 The *why* behind the load-bearing choices — virtual-share accounting, bad-debt socialization, the issuer-redemption exit, the NAV trust model, ERC-4626 illiquidity handling, key management — is recorded as Architecture Decision Records in [`docs/decisions/`](docs/decisions). Domain terms (share, asset, NAV, LLTV, socialization, curator, …) are defined once in [`docs/GLOSSARY.md`](docs/GLOSSARY.md).
 
-## Rayls bridge reference (kept from the official starter)
+## Provenance
 
-`src/HackathonToken.sol`, `script/{Deploy,Mint,Transfer,CheckBalance}.s.sol`, and `docs/architecture.md` + `docs/api-reference.md` are Rayls' official Privacy-Node→Public-Chain bridging reference, kept unmodified for the testnet deployment path (assets reach the Rayls Public Chain as bridged mirror tokens). **Not part of the audit surface.** This repo was scaffolded from [raylsnetwork/rayls-hackathon-starter](https://github.com/raylsnetwork/rayls-hackathon-starter) (`upstream` remote).
+Scaffolded from [raylsnetwork/rayls-hackathon-starter](https://github.com/raylsnetwork/rayls-hackathon-starter) (`upstream` remote). The starter's bridge-token demo (`HackathonToken.sol` and the `Mint`/`Transfer`/`Deploy`/`CheckBalance` scripts) has been removed to keep the surface focused on the vault. The `rayls-protocol-sdk` dependency and the starter's platform reference (`docs/architecture.md`, `docs/api-reference.md`) are retained for the eventual Privacy-Node→Public-Chain testnet path, where assets reach the Rayls Public Chain as bridged mirror tokens. **None of it is part of the vault's audit surface.**
