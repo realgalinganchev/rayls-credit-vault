@@ -31,6 +31,11 @@ forge script script/Demo.s.sol --rpc-url http://127.0.0.1:8545 --broadcast -vv
 
 # Bare deployment (set DEPLOYER_PRIVATE_KEY in .env first — see .env.example):
 forge script script/DeployCreditVault.s.sol --rpc-url http://127.0.0.1:8545 --broadcast
+
+# Interactive manual walkthrough (same scenario, run any of the 9 steps individually, any order, any number of times — requires jq):
+anvil                              # terminal 1
+./script/setup-manual-demo.sh      # terminal 2 — deploy + fund, re-run after any redeploy
+./script/manual-demo.sh            # interactive menu, or e.g. ./script/manual-demo.sh step5
 ```
 
 The demo uses Anvil's public default keys. **Never fund those addresses on a real network.**
